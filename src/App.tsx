@@ -7,6 +7,12 @@ import Products from './pages/Products';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Auth from './pages/Auth';
+import AdminLogin from './pages/admin/Login';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminProducts from './pages/admin/Products';
+import AdminCategories from './pages/admin/Categories';
+import AdminReports from './pages/admin/Reports';
+import AdminSettings from './pages/admin/Settings';
 
 /**
  * Main App component - application entry point
@@ -19,6 +25,14 @@ const App: React.FC = () => {
         <Routes>
           {/* Authentication route - outside of main layout */}
           <Route path="/auth" element={<Auth />} />
+          
+          {/* Admin routes - outside of main layout */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
           
           {/* Main application routes - wrapped in layout */}
           <Route path="/*" element={
