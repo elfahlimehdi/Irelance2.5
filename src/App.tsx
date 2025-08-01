@@ -16,6 +16,11 @@ import Analytics from './pages/admin/Analytics';
 import ActivityLogs from './pages/admin/ActivityLogs';
 import FirebaseStatus from './components/common/FirebaseStatus';
 import ProductImporter from './components/admin/ProductImporter';
+// Additional admin pages from remote
+import AdminProducts from './pages/admin/Products';
+import AdminCategories from './pages/admin/Categories';
+import AdminReports from './pages/admin/Reports';
+import AdminSettings from './pages/admin/Settings';
 
 /**
  * Main App component - application entry point
@@ -37,11 +42,12 @@ const App: React.FC = () => {
           }>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
-            <Route path="content" element={<div>Content Management</div>} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="categories" element={<AdminCategories />} />
             <Route path="analytics" element={<Analytics />} />
-            <Route path="api" element={<div>API Management</div>} />
+            <Route path="reports" element={<AdminReports />} />
             <Route path="activity" element={<ActivityLogs />} />
-            <Route path="settings" element={<div>Settings</div>} />
+            <Route path="settings" element={<AdminSettings />} />
             <Route path="import" element={<ProductImporter />} />
           </Route>
           
