@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Snowflake, Shield, Sun, Star, Laptop, Flame, Cpu } from 'lucide-react';
+import { Camera, Snowflake, Shield, Sun, Star, Laptop, Flame, Cpu, Monitor } from 'lucide-react';
 import { CATEGORIES } from '../constants/products';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -9,6 +9,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   securite: <Shield className="w-10 h-10 text-emerald-500 mb-4" />,
   solaire: <Sun className="w-10 h-10 text-yellow-400 mb-4" />,
   pc: <Laptop className="w-10 h-10 text-indigo-500 mb-4" />,
+  ordinateurs: <Monitor className="w-10 h-10 text-slate-600 mb-4" />,
   incendie: <Flame className="w-10 h-10 text-red-500 mb-4" />,
   electronique: <Cpu className="w-10 h-10 text-purple-500 mb-4" />,
 };

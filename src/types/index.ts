@@ -1,7 +1,15 @@
 /**
- * Product category types
+ * Product category types - Mise à jour avec toutes les catégories irelance
  */
-export type ProductCategory = 'cameras' | 'climatisation' | 'securite' | 'solaire';
+export type ProductCategory = 
+  | 'cameras' 
+  | 'climatisation' 
+  | 'securite' 
+  | 'solaire'
+  | 'pc'
+  | 'ordinateurs'
+  | 'incendie'
+  | 'electronique';
 
 /**
  * User role types
@@ -14,27 +22,68 @@ export type UserRole = 'user' | 'admin';
 export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered';
 
 /**
- * Product interface - represents a product in the catalog
+ * Product specifications interface - Spécifications techniques du produit
+ */
+export interface ProductSpecifications {
+  [key: string]: string | number | boolean;
+}
+
+/**
+ * Enhanced Product interface - Structure complète pour Firebase
  */
 export interface Product {
   /** Unique product identifier */
   id: string;
   /** Product name */
   name: string;
-  /** Product description */
-  description: string;
-  /** Product price in MAD */
-  price: number;
+  /** Product brand */
+  brand: string;
   /** Product category */
   category: ProductCategory;
-  /** Product image URL */
-  image: string;
-  /** Product features list */
-  features: string[];
+  /** Product price in MAD */
+  price: number;
+  /** Original price (if on promotion) */
+  originalPrice?: number;
+  /** Product SKU */
+  sku: string;
+  /** Product description */
+  description: string;
+  /** Short description for cards */
+  shortDescription: string;
+  /** Product images array */
+  images: string[];
+  /** Main product image */
+  mainImage: string;
   /** Product availability status */
   inStock: boolean;
+  /** Stock quantity */
+  stockQuantity: number;
+  /** Product specifications */
+  specifications: ProductSpecifications;
+  /** Product features list */
+  features: string[];
+  /** Product tags for search */
+  tags: string[];
+  /** Product rating (1-5) */
+  rating: number;
+  /** Number of reviews */
+  reviewCount: number;
+  /** Warranty information */
+  warranty: string;
   /** Product creation date */
-  created_at: string;
+  createdAt: Date;
+  /** Product last update date */
+  updatedAt: Date;
+  /** Product active status */
+  isActive: boolean;
+  /** Featured product status */
+  isFeatured: boolean;
+  /** Promotion percentage if applicable */
+  promotionPercentage?: number;
+  /** Legacy field for compatibility */
+  created_at?: string;
+  /** Legacy field for compatibility */
+  image?: string;
 }
 
 /**

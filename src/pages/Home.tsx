@@ -15,9 +15,11 @@ import {
   Star,
   Box,
   Rocket,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import ImageSlider from '../components/ImageSlider';
+import { useFeaturedProducts } from '../hooks/useProducts';
 
 const Home: React.FC = () => {
   const services = [
@@ -50,29 +52,8 @@ const Home: React.FC = () => {
     { number: '24/7', label: 'Support Technique', icon: TrendingUp }
   ];
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: 'Caméra IP 4K',
-      price: '2,500',
-      image: 'https://images.pexels.com/photos/430208/pexels-photo-430208.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Surveillance'
-    },
-    {
-      id: 2,
-      name: 'Climatiseur Inverter',
-      price: '8,500',
-      image: 'https://images.pexels.com/photos/8005394/pexels-photo-8005394.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Climatisation'
-    },
-    {
-      id: 3,
-      name: 'Panneau Solaire 300W',
-      price: '1,200',
-      image: 'https://images.pexels.com/photos/9875409/pexels-photo-9875409.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Solaire'
-    }
-  ];
+  // Récupérer les produits en vedette depuis Firebase
+  const { products: featuredProducts, loading: productsLoading } = useFeaturedProducts(6);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -261,45 +242,93 @@ const Home: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {product.category}
-                    </span>
+          {productsLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">Chargement des produits en vedette...</p>
+              </div>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <Box className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Aucun produit en vedette disponible pour le moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={product.mainImage || product.image}
+                      alt={product.name}
+                      className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=600';
+                      }}
+                    />
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium capitalize">
+                        {product.category}
+                      </span>
+                      {product.brand && (
+                        <span className="bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+                          {product.brand}
+                        </span>
+                      )}
+                    </div>
+                    {product.promotionPercentage && (
+                      <div className="absolute top-4 right-4">
+                        <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                          -{product.promotionPercentage}%
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-blue-600">
-                      {product.price} MAD
-                    </span>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                      Voir Détails
-                    </button>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {product.shortDescription || product.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {product.originalPrice && (
+                          <span className="text-sm text-gray-500 line-through mr-2">
+                            {product.originalPrice.toLocaleString()} MAD
+                          </span>
+                        )}
+                        <span className="text-2xl font-bold text-blue-600">
+                          {product.price.toLocaleString()} MAD
+                        </span>
+                        {product.rating && (
+                          <div className="flex items-center mt-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-gray-600 ml-1">
+                              {product.rating} ({product.reviewCount || 0})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        Voir Détails
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0 }}

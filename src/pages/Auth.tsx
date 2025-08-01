@@ -93,7 +93,7 @@ const Auth: React.FC = () => {
       const { error: authError } = await signIn(data.email, data.password);
       
       if (authError) {
-        setError(authError.message);
+        setError(typeof authError === 'string' ? authError : authError.message || 'Erreur de connexion');
       } else {
         navigate('/');
       }
@@ -122,7 +122,7 @@ const Auth: React.FC = () => {
       const { error: authError } = await signUp(data.email, data.password, data.fullName);
       
       if (authError) {
-        setError(authError.message);
+        setError(typeof authError === 'string' ? authError : authError.message || 'Erreur d\'inscription');
       } else {
         navigate('/');
       }

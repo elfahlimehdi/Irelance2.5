@@ -1,0 +1,174 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fonctions helper pour les vérifications d'authentification et de rôles
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             (request.auth.token.admin == true || 
+              request.auth.token.super_admin == true);
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.super_admin == true;
+    }
+    
+    function isModerator() {
+      return isAuthenticated() && 
+             (request.auth.token.moderator == true || 
+              request.auth.token.admin == true || 
+              request.auth.token.super_admin == true);
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasPermission(permission) {
+      return isAuthenticated() && 
+             permission in request.auth.token.permissions;
+    }
+    
+    // Collection des utilisateurs - accès restreint aux admins
+    match /users/{userId} {
+      // Lecture : admins ou propriétaire du document
+      allow read: if isAdmin() || isOwner(userId);
+      
+      // Création : seulement les super admins
+      allow create: if isSuperAdmin();
+      
+      // Mise à jour : admins pour les autres, utilisateur pour ses propres données
+      allow update: if isAdmin() || 
+                    (isOwner(userId) && 
+                     !('isAdmin' in request.resource.data) &&
+                     !('role' in request.resource.data));
+      
+      // Suppression : seulement les super admins
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Profils utilisateurs détaillés
+    match /user_profiles/{userId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || isOwner(userId);
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Logs d'activité - lecture seule pour les admins
+    match /activity_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Géré uniquement côté serveur
+    }
+    
+    // Paramètres de l'application - accès super admin uniquement
+    match /app_settings/{settingId} {
+      allow read: if isAdmin();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Contenu (articles, pages, etc.)
+    match /content/{contentId} {
+      // Lecture : contenu publié pour tous, tout contenu pour modérateurs+
+      allow read: if resource.data.status == 'published' || isModerator();
+      
+      // Création : modérateurs et plus
+      allow create: if isModerator() && 
+                    request.auth.uid == request.resource.data.authorId;
+      
+      // Mise à jour : auteur ou admin
+      allow update: if isModerator() && 
+                    (request.auth.uid == resource.data.authorId || isAdmin());
+      
+      // Suppression : admins uniquement
+      allow delete: if isAdmin();
+    }
+    
+    // Collections de produits (si applicable)
+    match /products/{productId} {
+      allow read: if true; // Lecture publique
+      allow write: if isModerator();
+    }
+    
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /brands/{brandId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Commandes - accès restreint
+    match /orders/{orderId} {
+      allow read: if isAdmin() || 
+                  (isAuthenticated() && 
+                   request.auth.uid == resource.data.userId);
+      allow create: if isAuthenticated() && 
+                    request.auth.uid == request.resource.data.userId;
+      allow update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Panier - accès utilisateur propriétaire
+    match /cart_items/{itemId} {
+      allow read, write: if isAuthenticated() && 
+                         request.auth.uid == resource.data.userId;
+    }
+    
+    // Métriques et analytics - lecture admin uniquement
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // Géré côté serveur
+    }
+    
+    // Configuration des APIs
+    match /api_config/{configId} {
+      allow read: if isAdmin();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Clés API et tokens
+    match /api_keys/{keyId} {
+      allow read: if isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Sauvegardes système
+    match /system_backups/{backupId} {
+      allow read: if isSuperAdmin();
+      allow write: if false; // Géré côté serveur uniquement
+    }
+    
+    // Notifications système
+    match /system_notifications/{notificationId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Webhooks configuration
+    match /webhooks/{webhookId} {
+      allow read: if isAdmin();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Statistiques en temps réel
+    match /realtime_stats/{statId} {
+      allow read: if isAdmin();
+      allow write: if false; // Généré automatiquement
+    }
+    
+    // Règles pour les sous-collections
+    match /{document=**} {
+      // Par défaut, refuser tout accès non explicitement autorisé
+      allow read, write: if false;
+    }
+  }
+} 

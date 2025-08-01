@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, Phone, Mail, User, LogOut, Home, Box, Info, Mail as MailIcon } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Box, Info, Mail as MailIcon } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const Header: React.FC = () => {
